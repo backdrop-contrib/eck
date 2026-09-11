@@ -14,8 +14,16 @@ function eck_schema() {
 
   $schema = array();
 
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+
   // Schema for an eck only cache table.
-  $schema['cache_eck'] = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_eck'] = $cache_schema;
+
+  // Also support entitycache.
+  foreach (EntityType::loadAll() as $entity_type) {
+    $schema["cache_entity_{$entity_type->name}"] = $cache_schema;
+    $schema["cache_entity_{$entity_type->name}"]['description'] = "Cache table used to store {$entity_type->name} entity records.";
+  }
 
   // Schema for the eck table.
   $schema['eck_entity_type'] = array(
@@ -65,7 +73,7 @@ function eck_schema() {
       ),
       'machine_name' => array(
         'description' => "A combination of the entity type and the name of"
-          . "this bundle, this combination is unique",
+        . "this bundle, this combination is unique",
         'type' => 'varchar',
         'length' => 128,
         'not null' => TRUE,
