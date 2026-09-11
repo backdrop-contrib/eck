@@ -124,3 +124,21 @@ function eck_schema() {
 function eck_update_last_removed() {
   return 7011;
 }
+
+/**
+ * Ensure Entitycache tables are present during upgrades from Drupal 7.
+ */
+function eck_update_1000() {
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  foreach (EntityType::loadAll() as $entity_type) {
+    if (!db_table_exists("cache_entity_{$entity_type->name}")) {
+      $schema = $cache_schema;
+      $schema['description'] = "Cache table used to store {$entity_type->name} entity records.";
+      db_create_table("cache_entity_{$entity_type->name}", $schema);
+    }
+  }
+  db_delete('system')
+    ->condition('name', 'eck_entitycache')
+    ->condition('type', 'module')
+    ->execute();
+}
