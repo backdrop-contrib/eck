@@ -252,7 +252,10 @@ function eck__entity__add($entity_type_name, $bundle_name) {
   $entity_type = entity_type_load($entity_type_name);
   $bundle = bundle_load($entity_type_name, $bundle_name);
 
-  $entity = entity_create($entity_type->name, array('type' => $bundle->name));
+  $entity = entity_create($entity_type_name, array(
+    'type' => $bundle->name,
+    'entity_type' => $entity_type_name,
+  ));
   return backdrop_get_form("eck__entity__form_add_{$entity_type_name}_{$bundle_name}", $entity);
 }
 
@@ -470,7 +473,6 @@ function eck__entity__form_submit($form, &$state) {
   // @TODO: maybe we should do this in the form validation step. That way we can
   // catch entity wrapper validation exceptions and set a form error message
   // appropriately.
-
   // Lets give the behavior a chance to manipulate the data before it is set.
   $data = eck_property_behavior_invoke_plugin($entity_type, 'pre_set', array('entity' => $entity), $values);
 
